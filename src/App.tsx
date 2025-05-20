@@ -1,11 +1,9 @@
-// App.tsx — no external status filter bar
-
 import { useEffect, useState } from 'react';
 import { CssBaseline, Box, Container, CircularProgress, Typography } from '@mui/material';
 
 import NavBar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
-import PatientTable from './components/PatientTable/PatientTable';
+import Dashboard from './pages/Dashboard/Dashboard';
 
 import type { Patient } from './types/Patient';
 import { fetchPatients } from './services/patients';
@@ -41,11 +39,7 @@ function App() {
             <CircularProgress />
           </Box>
         ) : (
-          !hidden && (
-            <Box mt={3}>
-              <PatientTable patients={patients} />
-            </Box>
-          )
+          <Dashboard hidden={hidden} patients={patients} />
         )}
       </Container>
       <Footer />

@@ -12,8 +12,6 @@ interface Props {
   onAddPatient?: (newPatient: Patient) => void;
 }
 
-
-// Helper to split full name
 const splitName = (full: string) => {
   const parts = full.trim().split(/\s+/);
   return {
@@ -29,17 +27,9 @@ type NameKey = typeof nameKeys[number];
 const PatientTable = ({ patients, searchQuery = '', onAddPatient }: Props) => {
   const [sortBy, setSortBy] = useState<'dob' | 'status' | 'address' | NameKey>('first');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-
-  const [filters, setFilters] = useState({
-    first: '',
-    middle: '',
-    last: '',
-    dob: '',
-    status: '',
-    address: ''
-  });
-
+  const [statusFilter, setStatusFilter] = useState('');
   const [adding, setAdding] = useState(false);
+
   const [newPatient, setNewPatient] = useState<{
     name: string;
     dob: string;
@@ -59,43 +49,35 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient }: Props) => {
     );
   };
 
-  const handleFilterChange = (field: keyof typeof filters, value: string) => {
-    setFilters(prev => ({ ...prev, [field]: value }));
-  };
+  const filtered = patients.filter(p => {
+    const { first, middle, last } = splitName(p.name);
+    const matchesStatus = !statusFilter || p.status === statusFilter;
+    const searchMatch = !searchQuery?.trim() || [
+      first,
+      middle,
+      last,
+      p.dob,
+      p.status,
+      p.address,
+    ]
+      .join(' ')
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
 
-const filtered = patients.filter(p => {
-  const { first, middle, last } = splitName(p.name);
-  const matchesFilters =
-    (!filters.first || first === filters.first) &&
-    (!filters.middle || middle === filters.middle) &&
-    (!filters.last || last === filters.last) &&
-    (!filters.dob || p.dob.includes(filters.dob)) &&
-    (!filters.status || p.status === filters.status) &&
-    (!filters.address || p.address.includes(filters.address));
-
-  const searchMatch = !searchQuery?.trim() || [
-    first,
-    middle,
-    last,
-    p.dob,
-    p.status,
-    p.address,
-  ]
-    .join(' ')
-    .toLowerCase()
-    .includes(searchQuery.toLowerCase());
-
-  return matchesFilters && searchMatch;
-});
+    return matchesStatus && searchMatch;
+  });
 
   const sorted = [...filtered].sort((a, b) => {
     const aName = splitName(a.name);
     const bName = splitName(b.name);
 
-    let aVal: string;
-    let bVal: string;
+    let aVal: any;
+    let bVal: any;
 
-    if (nameKeys.includes(sortBy as NameKey)) {
+    if (sortBy === 'dob') {
+      aVal = new Date(a.dob).getTime();
+      bVal = new Date(b.dob).getTime();
+    } else if (nameKeys.includes(sortBy as NameKey)) {
       aVal = aName[sortBy as NameKey];
       bVal = bName[sortBy as NameKey];
     } else {
@@ -104,17 +86,12 @@ const filtered = patients.filter(p => {
     }
 
     return sortDirection === 'asc'
-      ? `${aVal}`.localeCompare(`${bVal}`)
-      : `${bVal}`.localeCompare(`${aVal}`);
+      ? aVal - bVal || `${aVal}`.localeCompare(`${bVal}`)
+      : bVal - aVal || `${bVal}`.localeCompare(`${aVal}`);
   });
 
-  const getUniqueNameValues = (key: NameKey): string[] =>
-    [...new Set(patients.map(p => splitName(p.name)[key]))].filter(Boolean);
-
-  const getUniqueFieldValues = (
-    field: Exclude<keyof typeof filters, NameKey>
-  ): string[] =>
-    [...new Set(patients.map(p => p[field]))].filter(Boolean);
+  const getUniqueStatusValues = (): string[] =>
+    [...new Set(patients.map(p => p.status))].filter(Boolean);
 
   const handleNewPatientChange = (field: keyof typeof newPatient, value: string) => {
     setNewPatient(prev => ({ ...prev, [field]: value }));
@@ -144,55 +121,42 @@ const filtered = patients.filter(p => {
       <Table>
         <TableHead>
           <TableRow>
-            {nameKeys.map((key) => (
-              <TableCell key={key}>
-                <TableSortLabel
-                  active={sortBy === key}
-                  direction={sortBy === key ? sortDirection : 'asc'}
-                  onClick={() => handleSort(key)}
-                >
-                  {key.toUpperCase()}
-                </TableSortLabel>
-                <Select
-                  size="small"
-                  value={filters[key]}
-                  displayEmpty
-                  onChange={(e) => handleFilterChange(key, e.target.value)}
-                  sx={{ mt: 1, width: '100%' }}
-                >
-                  <MenuItem value="">All</MenuItem>
-                  {getUniqueNameValues(key).map((val) => (
-                    <MenuItem key={val} value={val}>
-                      {val}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </TableCell>
-            ))}
-
-            {(['dob', 'status', 'address'] as const).map((field) => (
+            {[...nameKeys, 'dob', 'status', 'address'].map((field) => (
               <TableCell key={field}>
-                <TableSortLabel
-                  active={sortBy === field}
-                  direction={sortBy === field ? sortDirection : 'asc'}
-                  onClick={() => handleSort(field)}
-                >
-                  {field.toUpperCase()}
-                </TableSortLabel>
-                <Select
-                  size="small"
-                  value={filters[field]}
-                  displayEmpty
-                  onChange={(e) => handleFilterChange(field, e.target.value)}
-                  sx={{ mt: 1, width: '100%' }}
-                >
-                  <MenuItem value="">All</MenuItem>
-                  {getUniqueFieldValues(field).map((val) => (
-                    <MenuItem key={val} value={val}>
-                      {val}
-                    </MenuItem>
-                  ))}
-                </Select>
+                <Box display="flex" alignItems="center" gap={1}>
+                  {field === 'status' ? (
+                    <Select
+                      size="small"
+                      value={statusFilter}
+                      displayEmpty
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      sx={{ width: '100%' }}
+                      renderValue={(selected) => selected || 'Status'}
+                    >
+                      <MenuItem value="">Status</MenuItem>
+                      {getUniqueStatusValues().map((val) => (
+                        <MenuItem key={val} value={val}>
+                          {val}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  ) : (
+                    <>
+                      <TableSortLabel
+                        active={sortBy === field}
+                        direction={sortBy === field ? sortDirection : 'asc'}
+                        onClick={() => handleSort(field as typeof sortBy)}
+                      >
+                        {field.toUpperCase()}
+                      </TableSortLabel>
+                      {sortBy === field && field !== 'dob' && field !== 'address' && (
+                        <Box component="span" fontSize="0.75rem" color="text.secondary">
+                          {sortDirection === 'asc' ? 'A to z' : 'z to A'}
+                        </Box>
+                      )}
+                    </>
+                  )}
+                </Box>
               </TableCell>
             ))}
           </TableRow>

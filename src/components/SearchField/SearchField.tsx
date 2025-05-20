@@ -1,4 +1,4 @@
-import { TextField, Box } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 
 interface SearchFieldProps {
   value: string;
@@ -6,19 +6,20 @@ interface SearchFieldProps {
   placeholder?: string;
 }
 
-const SearchField = ({ value, onChange, placeholder = "Search..." }: SearchFieldProps) => {
+const SearchField = ({ value, onChange, placeholder = 'Search by first name, last name, date of birth ...' }: SearchFieldProps) => {
   return (
-    <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+    <Box sx={{ mb: 2, width: '100%' }}>
       <TextField
+        fullWidth
         size="small"
         variant="outlined"
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        sx={{ width: 300 }}
       />
     </Box>
   );
 };
 
 export default SearchField;
+

@@ -13,17 +13,16 @@ const Dashboard = ({ hidden, patients }: Props) => {
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
-    <>
-      <SearchField value={searchQuery} onChange={setSearchQuery} />
-
-      <Container sx={{ mt: 4 }}>
-        {!hidden && (
+    <Container sx={{ mt: 4 }}>
+      {!hidden && (
+        <>
+          <SearchField value={searchQuery} onChange={setSearchQuery} />
           <Box mt={3}>
-           <PatientTable patients={patients} searchQuery={searchQuery} />
+            <PatientTable patients={patients} searchQuery={searchQuery} />
           </Box>
-        )}
-      </Container>
-    </>
+        </>
+      )}
+    </Container>
   );
 };
 
