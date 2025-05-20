@@ -1,29 +1,21 @@
-import { Box, Container } from '@mui/material';
-import { useState } from 'react';
-import SearchField from '../../components/SearchField/SearchField';
-import PatientTable from '../../components/PatientTable/PatientTable';
-import type { Patient } from '../../types/Patient';
+import { fetchPatients } from '../../services/patients';
+import { QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
 
-interface Props {
-  hidden: boolean;
-  patients: Patient[];
-}
+const [patients, setPatients] = useState<Patient[]>([]);
+const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+const [loading, setLoading] = useState(false);
+const [hasMore, setHasMore] = useState(true);
 
-const Dashboard = ({ hidden, patients }: Props) => {
-  const [searchQuery, setSearchQuery] = useState('');
+useEffect(() => {
+  loadMore(); // fetch first page
+}, []);
 
-  return (
-    <Container sx={{ mt: 4 }}>
-      {!hidden && (
-        <>
-          <SearchField value={searchQuery} onChange={setSearchQuery} />
-          <Box mt={3}>
-            <PatientTable patients={patients} searchQuery={searchQuery} />
-          </Box>
-        </>
-      )}
-    </Container>
-  );
+const loadMore = async () => {
+  if (loading) return;
+  setLoading(true);
+  const { patients: newPatients, lastVisible } = await fetchPatients(lastDoc);
+  setPatients((prev) => [...prev, ...newPatients]);
+  setLastDoc(lastVisible);
+  setHasMore(newPatients.length === 10);
+  setLoading(false);
 };
-
-export default Dashboard;
