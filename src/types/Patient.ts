@@ -1,13 +1,9 @@
-// src/types/Patient.ts
-
-export const PatientStatuses = ['Inquiry', 'Onboarding', 'Active', 'Churned'] as const;
-
-export type PatientStatus = typeof PatientStatuses[number];
+export type Status = 'Inquiry' | 'Onboarding' | 'Active' | 'Churned';
 
 export interface Patient {
   id: string;
-  name: string;
+  name: string;        
   dob: string;
-  status: PatientStatus;
+  status: Status;
   address: string;
 }

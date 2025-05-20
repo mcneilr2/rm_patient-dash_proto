@@ -1,14 +1,12 @@
-// Updated App.tsx — replaces MOCK_PATIENTS
+// App.tsx — no external status filter bar
 
 import { useEffect, useState } from 'react';
 import { CssBaseline, Box, Container, CircularProgress, Typography } from '@mui/material';
 
 import NavBar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
-import FilterControls from './components/FilterControls/FilterControls';
 import PatientTable from './components/PatientTable/PatientTable';
 
-import { usePatientFilters } from './state/usePatientFilters';
 import type { Patient } from './types/Patient';
 import { fetchPatients } from './services/patients';
 
@@ -17,9 +15,6 @@ function App() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<null | string>(null);
-
-  const { statusFilter, setStatusFilter, applyFilters } = usePatientFilters();
-  const filteredPatients = applyFilters(patients);
 
   useEffect(() => {
     const load = async () => {
@@ -46,14 +41,11 @@ function App() {
             <CircularProgress />
           </Box>
         ) : (
-          <>
-            <FilterControls value={statusFilter} onChange={setStatusFilter} />
-            {!hidden && (
-              <Box mt={3}>
-                <PatientTable patients={filteredPatients} />
-              </Box>
-            )}
-          </>
+          !hidden && (
+            <Box mt={3}>
+              <PatientTable patients={patients} />
+            </Box>
+          )
         )}
       </Container>
       <Footer />
