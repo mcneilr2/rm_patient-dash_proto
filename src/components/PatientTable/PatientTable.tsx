@@ -117,7 +117,7 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient }: Props) => {
   };
 
   return (
-    <Box>
+    <Box sx={{ maxHeight: '600px', overflowY: 'auto' }}>
       <Table>
         <TableHead>
           <TableRow>

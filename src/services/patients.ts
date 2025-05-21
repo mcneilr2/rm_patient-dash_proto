@@ -1,31 +1,13 @@
-import {
-  collection,
-  getDocs,
-  limit,
-  orderBy,
-  query,
-  startAfter,
-  DocumentData,
-  QueryDocumentSnapshot
-} from 'firebase/firestore';
-import { db } from '../firebase';
-import { Patient } from '../types/Patient';
+// src/services/patients.ts
 
-const PAGE_SIZE = 10;
+import type { Patient } from '../types/Patient';
 
-export async function fetchPatients(
-  lastDoc?: QueryDocumentSnapshot<DocumentData>
-): Promise<{ patients: Patient[]; lastVisible: QueryDocumentSnapshot | null }> {
-  const patientQuery = query(
-    collection(db, 'patients'),
-    orderBy('name'),
-    limit(PAGE_SIZE),
-    ...(lastDoc ? [startAfter(lastDoc)] : [])
-  );
+export async function fetchPatients(): Promise<Patient[]> {
+  const res = await fetch('/api/patients');
 
-  const snapshot = await getDocs(patientQuery);
-  const patients = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Patient[];
-  const lastVisible = snapshot.docs[snapshot.docs.length - 1] || null;
+  if (!res.ok) {
+    throw new Error(`Failed to fetch patients: ${res.status}`);
+  }
 
-  return { patients, lastVisible };
+  return res.json();
 }
