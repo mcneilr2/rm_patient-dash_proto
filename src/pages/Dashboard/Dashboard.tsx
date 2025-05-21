@@ -1,29 +1,16 @@
-import { Box, Container } from '@mui/material';
-import { useState } from 'react';
-import SearchField from '../../components/SearchField/SearchField';
 import PatientTable from '../../components/PatientTable/PatientTable';
 import type { Patient } from '../../types/Patient';
 
 interface Props {
-  hidden: boolean;
   patients: Patient[];
+  hidden: boolean;
+  onAddPatient: (data: Omit<Patient, 'id'>) => void;
 }
 
-const Dashboard = ({ hidden, patients }: Props) => {
-  const [searchQuery, setSearchQuery] = useState('');
+const Dashboard = ({ patients, hidden, onAddPatient }: Props) => {
+  if (hidden) return null;
 
-  return (
-    <Container sx={{ mt: 4 }}>
-      {!hidden && (
-        <>
-          <SearchField value={searchQuery} onChange={setSearchQuery} />
-          <Box mt={3}>
-            <PatientTable patients={patients} searchQuery={searchQuery} />
-          </Box>
-        </>
-      )}
-    </Container>
-  );
+  return <PatientTable patients={patients} onAddPatient={onAddPatient} />;
 };
 
 export default Dashboard;
