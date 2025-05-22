@@ -34,3 +34,6 @@ dist-ssr
 firebase-debug.log
 .firebaserc
 firestore.*
+
+# Prevent sensitive mock data
+src/assets/mockPatientData/
