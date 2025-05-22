@@ -2,10 +2,11 @@ import {
   Box, Button, Stack, TextField, Select, MenuItem,
   Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel, Typography
 } from '@mui/material';
-import { Add } from '@mui/icons-material';
+import { Add, Upload } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
 import type { Patient, Status } from '../../types/Patient';
 import { colors } from '../../styles/colors';
+import { addPatient } from '../../services/patients';
 
 const splitName = (full: string) => {
   const parts = full.trim().split(/\s+/);
@@ -38,7 +39,6 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
     address: ''
   });
 
-  // 🔁 Reset state when unhidden
   useEffect(() => {
     if (!hidden) {
       setAdding(false);
@@ -69,22 +69,31 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
     setNewPatient(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmitNewPatient = async () => {
-    if (!newPatient.name || !newPatient.dob || !newPatient.status || !newPatient.address) {
-      alert("All fields are required.");
-      return;
-    }
+const handleUploadClick = async () => {
+  console.log("📦 Upload button clicked");
 
-    const payload = { ...newPatient };
+  const { name, dob, status, address } = newPatient;
 
-    try {
-      await onAddPatient?.(payload);
-      setNewPatient({ name: '', dob: '', status: 'Inquiry', address: '' });
-      setAdding(false);
-    } catch {
-      alert('Failed to add patient.');
-    }
-  };
+  if (!name || !dob || !status || !address) {
+    alert("All fields are required.");
+    return;
+  }
+
+  try {
+    console.log("📤 Sending patient to API:", newPatient);
+    const created = await addPatient({ name, dob, status, address });
+    console.log("✅ API responded with:", created);
+
+    await onAddPatient?.(created);
+    setNewPatient({ name: '', dob: '', status: 'Inquiry', address: '' });
+    setAdding(false);
+  } catch (err: any) {
+    console.error("❌ Upload failed:", err);
+    alert(err?.message || 'Failed to add patient.');
+  }
+};
+
+
 
   const normalizedQuery = (searchQuery || '').trim().toLowerCase();
   const filtered = patients.filter(p => {
@@ -173,14 +182,14 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
               onChange={(e) => handleNewPatientChange('address', e.target.value)}
               sx={{ flex: 2 }}
             />
-            <Button
-              variant="contained"
-              color="success"
-              onClick={handleSubmitNewPatient}
-              sx={{ whiteSpace: 'nowrap' }}
-            >
-              Save Patient
-            </Button>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleUploadClick}
+            sx={{ minWidth: '40px', px: 1 }}
+          >
+            <Upload />
+          </Button>
           </Stack>
         </Box>
       )}

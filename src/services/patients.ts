@@ -7,12 +7,16 @@ export async function fetchPatients(): Promise<Patient[]> {
 }
 
 export async function addPatient(patient: Omit<Patient, 'id'>): Promise<Patient> {
-  const res = await fetch('/api/patients', {
+  const res = await fetch('/api/addPatient', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(patient),
   });
 
-  if (!res.ok) throw new Error(`Failed to add patient: ${res.status}`);
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error || `Failed with ${res.status}`);
+  }
+
   return res.json();
 }

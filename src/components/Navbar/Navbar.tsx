@@ -35,7 +35,7 @@ const NavBar = ({ onToggleHide, isHidden }: Props) => (
             }}
           />
           <Typography variant="h3" sx={{ color: colors.text.light, paddingLeft: '1rem' }}>
-            Patient Dashboard
+            Dashboard
           </Typography>
         </Box>
 <Button

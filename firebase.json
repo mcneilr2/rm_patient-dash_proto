@@ -24,14 +24,18 @@
       "**/node_modules/**"
     ],
     "rewrites": [
-  {
-    "source": "/api/**",
-    "function": "getPatients"
-  },
-  {
-    "source": "**",
-    "destination": "/index.html"
-  }
-]
+      {
+        "source": "/api/patients",
+        "function": "getPatients"
+      },
+      {
+        "source": "/api/addPatient",
+        "function": "addPatient"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
   }
 }
