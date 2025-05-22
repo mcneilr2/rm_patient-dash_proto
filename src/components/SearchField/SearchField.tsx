@@ -34,7 +34,7 @@ const SearchField = ({
           '& .MuiOutlinedInput-root': {
             borderRadius: '0.75rem',
           },
-          backgroundColor: 'white'
+          backgroundColor: colors.white,
         }}
       />
     </Box>

@@ -24,21 +24,22 @@ const NavBar = ({ onToggleHide, isHidden }: Props) => (
     >
       <Toolbar
         sx={{
-          px: { xs: 2, sm: 3 },
-          py: { xs: 1, sm: 1.5 },
+          px: { xs: '0.5rem', sm: '0.75rem' },
+          py: { xs: '0.5rem', sm: '1.5rem' },
           display: 'flex',
           justifyContent: 'space-between',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <img
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Box
+            component="img"
             src={`https://placehold.co/600x400/${colors.grey.select.slice(1)}/${colors.secondary.slice(1)}?font=poppins&text=Logo`}
             alt="Company Logo"
-            style={{
+            sx={{
               width: '3rem',
               height: '3rem',
               objectFit: 'cover',
-              borderRadius: '50%'
+              borderRadius: '50%',
             }}
           />
           <Typography
@@ -53,24 +54,25 @@ const NavBar = ({ onToggleHide, isHidden }: Props) => (
             Dashboard
           </Typography>
         </Box>
+
         <Button
           onClick={onToggleHide}
           sx={{
             backgroundColor: colors.grey.select,
             color: colors.primary,
-            border: '2px solid white',
+            border: `2px solid ${colors.white}`,
             borderRadius: '1.25rem',
             fontWeight: 700,
             textTransform: 'none',
-            px: { xs: 0.5, sm: 2.5 },
-            py: { xs: 0.5, sm: 2.5 },
+            px: { xs: '0.5rem', sm: '2.5rem' },
+            py: { xs: '0.5rem', sm: '2.5rem' },
             fontSize: { xs: '0.75rem', sm: '1.25rem' },
-            boxShadow: '0 1px 4px rgba(0, 0, 0, 0.1)',
+            boxShadow: colors.shadow.light,
             cursor: 'pointer',
             '&:hover': {
               backgroundColor: colors.grey[400],
-              color: 'white',
-              boxShadow: '0 3px 6px rgba(0, 0, 0, 0.15)',
+              color: colors.white,
+              boxShadow: colors.shadow.medium,
             },
           }}
         >
