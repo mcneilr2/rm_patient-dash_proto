@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 import {
-  CssBaseline, Box, Container, CircularProgress, Typography,
+  CssBaseline, Box, CircularProgress, Typography
 } from '@mui/material';
-
-import NavBar from './components/Navbar/Navbar';
+import NavBar from './components/Navbar/NavBar';
 import Footer from './components/Footer/Footer';
-import Dashboard from './pages/Dashboard/Dashboard';
-
+import PatientTable from './components/PatientTable/PatientTable';
 import type { Patient } from './types/Patient';
-import { fetchPatients, addPatient } from './services/patients';
+import { fetchPatients } from './services/patients';
+import { colors } from './styles/colors';
 
 function App() {
   const [hidden, setHidden] = useState(false);
@@ -30,31 +29,45 @@ function App() {
     load();
   }, []);
 
-  const handleAddPatient = async (data: Omit<Patient, 'id'>) => {
-    try {
-      const newPatient = await addPatient(data);
-      setPatients((prev) => [...prev, newPatient]);
-    } catch (err: any) {
-      setError(err.message || 'Failed to add patient.');
-    }
-  };
-
   return (
-    <>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        width: '100%',
+        backgroundImage: 'url("/images/blue_background_graphic.svg")',
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '0rem 1rem'
+      }}
+    >
       <CssBaseline />
       <NavBar onToggleHide={() => setHidden(!hidden)} isHidden={hidden} />
-      <Container sx={{ mt: 4 }}>
+      <Box
+        sx={{
+          width: '100%',
+          maxWidth: '1200px',
+          mt: 4,
+          backgroundColor: colors.background.default,
+          borderRadius: 2,
+          boxShadow: '0 0 12px rgba(0,0,0,0.1)',
+          p: 3,
+        }}
+      >
         {error && <Typography color="error">{error}</Typography>}
         {loading ? (
           <Box display="flex" justifyContent="center" mt={4}>
             <CircularProgress />
           </Box>
         ) : (
-          <Dashboard hidden={hidden} patients={patients} onAddPatient={handleAddPatient} />
+          <PatientTable patients={patients} hidden={hidden} />
         )}
-      </Container>
+      </Box>
       <Footer />
-    </>
+    </Box>
   );
 }
 

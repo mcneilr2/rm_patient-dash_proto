@@ -1,5 +1,5 @@
 import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
-import { colors } from '../../styles/colors'; // adjust the path if needed
+import { colors } from '../../styles/colors';
 
 interface Props {
   onToggleHide: () => void;
@@ -9,13 +9,11 @@ interface Props {
 const NavBar = ({ onToggleHide, isHidden }: Props) => (
   <Box
     sx={{
-      border: `2px solid ${colors.background.tableHeader}`,
+      width: '100%',
       background: colors.gradient.navbar,
-      borderRadius: 2, // ~16px
-      m: 2,
-      overflow: 'hidden',
-      backgroundColor: colors.primary,
-      boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)',
+      borderBottom: `0.25rem solid ${colors.border.beige}`,
+      borderBottomLeftRadius: '1rem',
+      borderBottomRightRadius: '1rem'   
     }}
   >
     <AppBar
@@ -24,8 +22,7 @@ const NavBar = ({ onToggleHide, isHidden }: Props) => (
       color="transparent"
       sx={{ backgroundColor: 'transparent' }}
     >
-      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        {/* Logo + Title */}
+      <Toolbar sx={{ px: 3, py: 1.5, display: 'flex', justifyContent: 'space-between' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <img
             src="https://placehold.co/600x400/EEE/31343C?font=poppins&text=YourLogo"
@@ -37,29 +34,33 @@ const NavBar = ({ onToggleHide, isHidden }: Props) => (
               borderRadius: '50%',
             }}
           />
-          <Typography variant="h6" component="div" sx={{ color: '#fffdfa' }}>
+          <Typography variant="h3" sx={{ color: colors.text.light, paddingLeft: '1rem' }}>
             Patient Dashboard
           </Typography>
         </Box>
+<Button
+  onClick={onToggleHide}
+  sx={{
+    backgroundColor: colors.grey.select,    // soft blue
+    color: colors.primary,                  // orange text
+    border: '2px solid white',
+    borderRadius: '20px',
+    fontWeight: 700,
+    textTransform: 'none',
+    px: 2.5,
+    py: 0.75,
+    boxShadow: '0 1px 4px rgba(0, 0, 0, 0.1)',
+    cursor: 'pointer',
+    '&:hover': {
+      backgroundColor: colors.grey[400],
+      color: 'white',
+      boxShadow: '0 3px 6px rgba(0, 0, 0, 0.15)',
+    },
+  }}
+>
+  {isHidden ? 'Unhide Screen' : 'Quick Hide'}
+</Button>
 
-        {/* Quick Hide Button */}
-        <Button
-          variant="contained"
-          onClick={onToggleHide}
-          sx={{
-            backgroundColor: colors.background.tableHeader,
-            color: colors.primary,
-            textTransform: 'none',
-            fontWeight: 600,
-            borderRadius: 2,
-            '&:hover': {
-              backgroundColor: colors.background.tableHeader,
-              opacity: 0.9,
-            },
-          }}
-        >
-          {isHidden ? 'Unhide Screen' : 'Quick Hide'}
-        </Button>
       </Toolbar>
     </AppBar>
   </Box>

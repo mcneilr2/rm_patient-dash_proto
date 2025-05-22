@@ -1,16 +1,11 @@
 import {
-  Table, TableHead, TableRow, TableCell, TableBody,
-  TableSortLabel, Select, MenuItem, Box, Button, Stack, TextField
+  Box, Button, Stack, TextField, Select, MenuItem,
+  Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel, Typography
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Patient, Status } from '../../types/Patient';
-
-interface Props {
-  patients: Patient[];
-  searchQuery?: string;
-  onAddPatient?: (newPatient: Omit<Patient, 'id'>) => void;
-}
+import { colors } from '../../styles/colors';
 
 const splitName = (full: string) => {
   const parts = full.trim().split(/\s+/);
@@ -24,12 +19,18 @@ const splitName = (full: string) => {
 const nameKeys = ['first', 'middle', 'last'] as const;
 type NameKey = typeof nameKeys[number];
 
-const PatientTable = ({ patients, searchQuery = '', onAddPatient }: Props) => {
+interface Props {
+  patients: Patient[];
+  searchQuery?: string;
+  onAddPatient?: (newPatient: Omit<Patient, 'id'>) => void;
+  hidden?: boolean;
+}
+
+const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Props) => {
   const [sortBy, setSortBy] = useState<'dob' | 'status' | 'address' | NameKey>('first');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [statusFilter, setStatusFilter] = useState('');
   const [adding, setAdding] = useState(false);
-
   const [newPatient, setNewPatient] = useState({
     name: '',
     dob: '',
@@ -37,58 +38,32 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient }: Props) => {
     address: ''
   });
 
+  // 🔁 Reset state when unhidden
+  useEffect(() => {
+    if (!hidden) {
+      setAdding(false);
+      setStatusFilter('');
+      setSortBy('first');
+      setSortDirection('asc');
+    }
+  }, [hidden]);
+
+  if (hidden) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 10 }}>
+        <Typography variant="h6" color="text.secondary">
+          🔒 Screen Hidden
+        </Typography>
+      </Box>
+    );
+  }
+
   const handleSort = (field: typeof sortBy) => {
     setSortBy(field);
     setSortDirection(prev =>
       sortBy === field ? (prev === 'asc' ? 'desc' : 'asc') : 'asc'
     );
   };
-
-  const normalizedQuery = (searchQuery || '').trim().toLowerCase();
-
-  const filtered = patients.filter(p => {
-    const { first, middle, last } = splitName(p.name);
-    const matchesStatus = !statusFilter || p.status === statusFilter;
-    const searchMatch = !normalizedQuery || [
-      first,
-      middle,
-      last,
-      p.dob,
-      p.status,
-      p.address,
-    ]
-      .join(' ')
-      .toLowerCase()
-      .includes(normalizedQuery);
-
-    return matchesStatus && searchMatch;
-  });
-
-  const sorted = [...filtered].sort((a, b) => {
-    const aName = splitName(a.name);
-    const bName = splitName(b.name);
-
-    let aVal: any;
-    let bVal: any;
-
-    if (sortBy === 'dob') {
-      aVal = new Date(a.dob).getTime();
-      bVal = new Date(b.dob).getTime();
-    } else if (nameKeys.includes(sortBy as NameKey)) {
-      aVal = aName[sortBy as NameKey];
-      bVal = bName[sortBy as NameKey];
-    } else {
-      aVal = (a as any)[sortBy];
-      bVal = (b as any)[sortBy];
-    }
-
-    return sortDirection === 'asc'
-      ? aVal - bVal || `${aVal}`.localeCompare(`${bVal}`)
-      : bVal - aVal || `${bVal}`.localeCompare(`${aVal}`);
-  });
-
-  const getUniqueStatusValues = (): string[] =>
-    [...new Set(patients.map(p => p.status))].filter(Boolean);
 
   const handleNewPatientChange = (field: keyof typeof newPatient, value: string) => {
     setNewPatient(prev => ({ ...prev, [field]: value }));
@@ -100,31 +75,55 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient }: Props) => {
       return;
     }
 
-    const payload = {
-      name: newPatient.name,
-      dob: newPatient.dob,
-      status: newPatient.status,
-      address: newPatient.address,
-    };
+    const payload = { ...newPatient };
 
     try {
-      if (onAddPatient) await onAddPatient(payload);
+      await onAddPatient?.(payload);
       setNewPatient({ name: '', dob: '', status: 'Inquiry', address: '' });
       setAdding(false);
-    } catch (err) {
+    } catch {
       alert('Failed to add patient.');
     }
   };
 
+  const normalizedQuery = (searchQuery || '').trim().toLowerCase();
+  const filtered = patients.filter(p => {
+    const { first, middle, last } = splitName(p.name);
+    return (!statusFilter || p.status === statusFilter) &&
+      (!normalizedQuery || [first, middle, last, p.dob, p.status, p.address].join(' ').toLowerCase().includes(normalizedQuery));
+  });
+
+  const sorted = [...filtered].sort((a, b) => {
+    const aName = splitName(a.name);
+    const bName = splitName(b.name);
+    const aVal = nameKeys.includes(sortBy as NameKey) ? aName[sortBy as NameKey] : (a as any)[sortBy];
+    const bVal = nameKeys.includes(sortBy as NameKey) ? bName[sortBy as NameKey] : (b as any)[sortBy];
+    return sortDirection === 'asc'
+      ? aVal.localeCompare(bVal)
+      : bVal.localeCompare(aVal);
+  });
+
+  const getUniqueStatusValues = () =>
+    [...new Set(patients.map(p => p.status))];
+
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, marginBottom: '1rem' }}>
         <Button
-          variant="contained"
-          color="primary"
+          variant="outlined"
           startIcon={<Add />}
           onClick={() => setAdding(true)}
-          sx={{ borderRadius: '12px', px: 1, py: 1 }}
+          sx={{
+            border: `2px solid ${colors.border.beige}`,
+            color: colors.primary,
+            backgroundColor: colors.background.paper,
+            borderRadius: 2,
+            px: 2,
+            py: 1,
+            '&:hover': {
+              backgroundColor: colors.background.default,
+            },
+          }}
         >
           Add Patient
         </Button>
@@ -135,9 +134,9 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient }: Props) => {
           sx={{
             mb: 3,
             p: 2,
-            border: '2px solid #f1f1ef',
-            borderRadius: 2,
-            backgroundColor: '#fffdfa'
+            border: `2px solid ${colors.border.beige}`,
+            borderRadius: '1rem',
+            backgroundColor: colors.background.paper
           }}
         >
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} flexWrap="wrap">
@@ -146,20 +145,20 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient }: Props) => {
               size="small"
               value={newPatient.name}
               onChange={(e) => handleNewPatientChange('name', e.target.value)}
-              sx={{ flex: 1, minWidth: '200px' }}
+              sx={{ flex: 1 }}
             />
             <TextField
               type="date"
               size="small"
               value={newPatient.dob}
               onChange={(e) => handleNewPatientChange('dob', e.target.value)}
-              sx={{ flex: 1, minWidth: '150px' }}
+              sx={{ flex: 1 }}
             />
             <Select
               size="small"
               value={newPatient.status}
               onChange={(e) => handleNewPatientChange('status', e.target.value as Status)}
-              sx={{ flex: 1, minWidth: '150px' }}
+              sx={{ flex: 1 }}
             >
               {['Inquiry', 'Onboarding', 'Active', 'Churned'].map((status) => (
                 <MenuItem key={status} value={status}>
@@ -172,7 +171,7 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient }: Props) => {
               size="small"
               value={newPatient.address}
               onChange={(e) => handleNewPatientChange('address', e.target.value)}
-              sx={{ flex: 2, minWidth: '250px' }}
+              sx={{ flex: 2 }}
             />
             <Button
               variant="contained"
@@ -186,62 +185,49 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient }: Props) => {
         </Box>
       )}
 
-      <Box sx={{ maxHeight: 500, overflowY: 'auto', borderRadius: '12px' }}>
+      <Box
+        sx={{
+          maxHeight: 500,
+          overflowY: 'auto',
+          border: `2px solid ${colors.border.beige}`,
+          borderRadius: 2,
+          backgroundColor: colors.background.default,
+        }}
+      >
         <Table stickyHeader>
-          <TableHead>
+          <TableHead sx={{ backgroundColor: colors.grey.select }}>
             <TableRow>
               {[...nameKeys, 'dob', 'status', 'address'].map((field) => (
                 <TableCell key={field}>
-                  <Box display="flex" alignItems="center" gap={1} width="100%">
-                    {field === 'status' ? (
-                      <>
-                        <Select
-                          size="small"
-                          value={statusFilter}
-                          displayEmpty
-                          onChange={(e) => setStatusFilter(e.target.value)}
-                          sx={{ flex: 1 }}
-                          renderValue={(selected) => selected || 'Status'}
-                        >
-                          {getUniqueStatusValues().map((val) => (
-                            <MenuItem key={val} value={val}>
-                              {val}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                        <TableSortLabel
-                          active={sortBy === 'status'}
-                          direction={sortBy === 'status' ? sortDirection : 'asc'}
-                          onClick={() => handleSort('status')}
-                          sx={{
-                            '& .MuiTableSortLabel-icon': {
-                              opacity: 1,
-                              color: sortBy === 'status' ? 'grey.800' : 'grey.400'
-                            }
-                          }}
-                        />
-                      </>
-                    ) : (
-                      <>
-                        <TableSortLabel
-                          active={sortBy === field}
-                          direction={sortBy === field ? sortDirection : 'asc'}
-                          onClick={() => handleSort(field as typeof sortBy)}
-                          sx={{
-                            '& .MuiTableSortLabel-icon': {
-                              opacity: 1,
-                              color: sortBy === field ? 'grey.800' : 'grey.400'
-                            }
-                          }}
-                        >
-                          {field.toUpperCase()}
-                        </TableSortLabel>
-                        {sortBy === field && !['dob', 'address'].includes(field) && (
-                          <Box component="span" fontSize="0.75rem" color="text.secondary">
-                            {sortDirection === 'asc' ? 'A to z' : 'z to A'}
-                          </Box>
-                        )}
-                      </>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <TableSortLabel
+                      active={sortBy === field}
+                      direction={sortBy === field ? sortDirection : 'asc'}
+                      onClick={() => handleSort(field as typeof sortBy)}
+                      sx={{
+                        '& .MuiTableSortLabel-icon': {
+                          opacity: 1,
+                          color: sortBy === field ? colors.grey[800] : colors.grey[400]
+                        }
+                      }}
+                    >
+                      {field.toUpperCase()}
+                    </TableSortLabel>
+                    {field === 'status' && (
+                      <Select
+                        size="small"
+                        value={statusFilter}
+                        displayEmpty
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        sx={{ ml: 1 }}
+                        renderValue={(selected) => selected || 'Status'}
+                      >
+                        {getUniqueStatusValues().map((val) => (
+                          <MenuItem key={val} value={val}>
+                            {val}
+                          </MenuItem>
+                        ))}
+                      </Select>
                     )}
                   </Box>
                 </TableCell>
@@ -249,10 +235,21 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient }: Props) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {sorted.map((p) => {
+            {sorted.map((p, index) => {
               const { first, middle, last } = splitName(p.name);
               return (
-                <TableRow key={p.id}>
+                <TableRow
+                  key={p.id}
+                  sx={{
+                    backgroundColor: index % 2 === 0
+                      ? colors.background.paper
+                      : colors.background.rowAlternate,
+                    borderBottom: `1px solid ${colors.border.light}`,
+                    '&:hover': {
+                      backgroundColor: colors.background.input,
+                    }
+                  }}
+                >
                   <TableCell>{first}</TableCell>
                   <TableCell>{middle}</TableCell>
                   <TableCell>{last}</TableCell>
