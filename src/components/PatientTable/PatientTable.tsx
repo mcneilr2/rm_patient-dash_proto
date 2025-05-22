@@ -2,8 +2,8 @@ import {
   Box, Button, Stack, TextField, Select, MenuItem,
   Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel, Typography
 } from '@mui/material';
-import { Add, Upload } from '@mui/icons-material';
-import { useState, useEffect } from 'react';
+import { Add, Upload, Cancel } from '@mui/icons-material';
+import { useEffect, useState } from 'react';
 import type { Patient, Status } from '../../types/Patient';
 import { colors } from '../../styles/colors';
 import { addPatient } from '../../services/patients';
@@ -33,7 +33,7 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [statusFilter, setStatusFilter] = useState('');
   const [adding, setAdding] = useState(false);
-  const [query, setQuery] = useState(searchQuery);
+  const [search, setSearch] = useState('');
   const [newPatient, setNewPatient] = useState({
     name: '',
     dob: '',
@@ -45,6 +45,7 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
     if (!hidden) {
       setAdding(false);
       setStatusFilter('');
+      setSearch('');
       setSortBy('first');
       setSortDirection('asc');
     }
@@ -62,13 +63,14 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
   };
 
   const handleUploadClick = async () => {
-    if (!newPatient.name || !newPatient.dob || !newPatient.status || !newPatient.address) {
+    const { name, dob, status, address } = newPatient;
+    if (!name || !dob || !status || !address) {
       alert("All fields are required.");
       return;
     }
 
     try {
-      const created = await addPatient(newPatient);
+      const created = await addPatient({ name, dob, status, address });
       await onAddPatient?.(created);
       setNewPatient({ name: '', dob: '', status: 'Inquiry', address: '' });
       setAdding(false);
@@ -77,7 +79,7 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
     }
   };
 
-  const normalizedQuery = query.trim().toLowerCase();
+  const normalizedQuery = search.trim().toLowerCase();
   const filtered = patients.filter(p => {
     const { first, middle, last } = splitName(p.name);
     return (!statusFilter || p.status === statusFilter) &&
@@ -109,6 +111,7 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
 
   return (
     <Box>
+      <SearchField value={search} onChange={setSearch} />
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
         <Button
           variant="outlined"
@@ -182,11 +185,17 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
             >
               <Upload />
             </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => setAdding(false)}
+              sx={{ minWidth: '40px', px: 1 }}
+            >
+              <Cancel />
+            </Button>
           </Stack>
         </Box>
       )}
-
-      <SearchField value={query} onChange={setQuery} />
 
       <Box
         sx={{
@@ -194,72 +203,71 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
           overflowY: 'auto',
           border: `2px solid ${colors.border.beige}`,
           borderRadius: '1rem',
-          backgroundColor: colors.background.paper
+          backgroundColor: colors.background.paper,
         }}
       >
         <Table stickyHeader>
-          <TableHead>
+          <TableHead sx={{ backgroundColor: colors.secondary }}>
             <TableRow>
               {[...nameKeys, 'dob', 'status', 'address'].map((field) => (
                 <TableCell
                   key={field}
                   sx={{
-                    backgroundColor: colors.secondary,
+                    width: field === 'dob'
+                      ? { xs: '20%', sm: '22%', md: '24%' }
+                      : '20%',
                     whiteSpace: 'nowrap',
-                    minWidth: '100px'
                   }}
                 >
-                  <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
-                    {field === 'status' ? (
-                      <>
-                        <Select
-                          size="small"
-                          value={statusFilter}
-                          displayEmpty
-                          onChange={(e) => setStatusFilter(e.target.value)}
-                          renderValue={(selected) => selected || 'Status'}
-                          sx={{
-                            backgroundColor: '#fff',
-                            flex: 1,
-                            fontSize: '0.875rem'
-                          }}
-                        >
-                          {getUniqueStatusValues().map((val) => (
-                            <MenuItem key={val} value={val}>
-                              {val}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                        <TableSortLabel
-                          active={sortBy === field}
-                          direction={sortBy === field ? sortDirection : 'asc'}
-                          onClick={() => handleSort(field as typeof sortBy)}
-                          sx={{
-                            '& .MuiTableSortLabel-icon': {
-                              opacity: 1,
-                              color: sortBy === field ? colors.grey[800] : colors.grey[400]
-                            }
-                          }}
-                        />
-                      </>
-                    ) : (
-                      <>
-                        <TableSortLabel
-                          active={sortBy === field}
-                          direction={sortBy === field ? sortDirection : 'asc'}
-                          onClick={() => handleSort(field as typeof sortBy)}
-                          sx={{
-                            '& .MuiTableSortLabel-icon': {
-                              opacity: 1,
-                              color: sortBy === field ? colors.grey[800] : colors.grey[400]
-                            }
-                          }}
-                        >
-                          {field.toUpperCase()}
-                        </TableSortLabel>
-                      </>
-                    )}
-                  </Box>
+                  {field === 'status' ? (
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Select
+                        size="small"
+                        value={statusFilter}
+                        displayEmpty
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        renderValue={(selected) => selected || 'Any Status'}
+                        sx={{
+                          fontSize: '0.75rem',
+                          minWidth: '80px'
+                        }}
+                      >
+                        <MenuItem value="">Any Status</MenuItem>
+                        {getUniqueStatusValues().map((val) => (
+                          <MenuItem key={val} value={val}>
+                            {val}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      <TableSortLabel
+                        active={sortBy === field}
+                        direction={sortBy === field ? sortDirection : 'asc'}
+                        onClick={() => handleSort(field as typeof sortBy)}
+                        sx={{
+                          '& .MuiTableSortLabel-icon': {
+                            opacity: 1,
+                            color: sortBy === field ? colors.grey[800] : colors.grey[400],
+                          }
+                        }}
+                      />
+                    </Box>
+                  ) : (
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <TableSortLabel
+                        active={sortBy === field}
+                        direction={sortBy === field ? sortDirection : 'asc'}
+                        onClick={() => handleSort(field as typeof sortBy)}
+                        sx={{
+                          '& .MuiTableSortLabel-icon': {
+                            opacity: 1,
+                            color: sortBy === field ? colors.grey[800] : colors.grey[400],
+                          }
+                        }}
+                      >
+                        {field.toUpperCase()}
+                      </TableSortLabel>
+                    </Box>
+                  )}
                 </TableCell>
               ))}
             </TableRow>
@@ -283,7 +291,17 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
                   <TableCell>{first}</TableCell>
                   <TableCell>{middle}</TableCell>
                   <TableCell>{last}</TableCell>
-                  <TableCell>{p.dob}</TableCell>
+                  <TableCell
+                    sx={{
+                      whiteSpace: 'nowrap',
+                      overflowX: 'auto',
+                      textOverflow: 'auto'
+                    }}
+                  >
+                    <Box component="span" sx={{ display: 'inline-block', minWidth: 'max-content' }}>
+                      {p.dob}
+                    </Box>
+                  </TableCell>
                   <TableCell>{p.status}</TableCell>
                   <TableCell>{p.address}</TableCell>
                 </TableRow>

@@ -1,4 +1,5 @@
 import { Box, TextField } from '@mui/material';
+import { colors } from '../../styles/colors';
 
 interface SearchFieldProps {
   value: string;
@@ -12,7 +13,13 @@ const SearchField = ({
   placeholder = 'Search by name, DOB, status, etc.',
 }: SearchFieldProps) => {
   return (
-    <Box sx={{ mb: { xs: 2, sm: 3 }, width: '100%' }}>
+    <Box
+      sx={{
+        mb: { xs: 2, sm: 3 },
+        mt: { xs: 2, sm: 3 },
+        width: '100%',
+      }}
+    >
       <TextField
         fullWidth
         size="small"
@@ -21,9 +28,13 @@ const SearchField = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         sx={{
-          input: {
+          '& .MuiInputBase-input': {
             fontSize: { xs: '0.85rem', sm: '1rem' },
           },
+          '& .MuiOutlinedInput-root': {
+            borderRadius: '0.75rem',
+          },
+          backgroundColor: 'white'
         }}
       />
     </Box>

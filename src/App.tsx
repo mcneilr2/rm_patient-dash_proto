@@ -1,4 +1,4 @@
-import { CssBaseline } from '@mui/material';
+import { CssBaseline, CircularProgress, Box, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import NavBar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
@@ -31,8 +31,8 @@ function App() {
   return (
     <>
       <CssBaseline />
-      <div
-        style={{
+      <Box
+        sx={{
           minHeight: '100vh',
           width: '100%',
           backgroundImage: 'url("/images/blue_background_graphic.svg")',
@@ -42,16 +42,32 @@ function App() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          padding: '0 1rem'
+          px: { xs: 2, sm: 3 },
         }}
       >
         <NavBar onToggleHide={() => setHidden(!hidden)} isHidden={hidden} />
-        <ResponsiveContainer sx={{ mt: 4, backgroundColor: colors.background.default }}>
-          {error && <div style={{ color: 'red' }}>{error}</div>}
-          <PatientTable patients={patients} hidden={hidden} />
+        <ResponsiveContainer
+          sx={{
+            mt: 4,
+            mb: 2,
+            backgroundColor: colors.background.default,
+            borderRadius: { xs: '1rem', md: '1.5rem' },
+            boxShadow: '0 0 12px rgba(0,0,0,0.1)',
+            pb: 3,
+            width: '100%',
+          }}
+        >
+          {error && <Typography color="error">{error}</Typography>}
+          {loading ? (
+            <Box display="flex" justifyContent="center" mt={4}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <PatientTable patients={patients} hidden={hidden} />
+          )}
         </ResponsiveContainer>
         <Footer />
-      </div>
+      </Box>
     </>
   );
 }

@@ -38,8 +38,7 @@ const NavBar = ({ onToggleHide, isHidden }: Props) => (
               width: '3rem',
               height: '3rem',
               objectFit: 'cover',
-              borderRadius: '50%',
-              border: `0.5rem solid ${colors.grey.select}`,
+              borderRadius: '50%'
             }}
           />
           <Typography
@@ -48,7 +47,7 @@ const NavBar = ({ onToggleHide, isHidden }: Props) => (
               color: colors.text.light,
               paddingLeft: { xs: '0.5rem', sm: '1rem' },
               fontSize: { xs: '1.5rem', sm: '2rem', md: '2.25rem' },
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
             }}
           >
             Dashboard
@@ -60,12 +59,12 @@ const NavBar = ({ onToggleHide, isHidden }: Props) => (
             backgroundColor: colors.grey.select,
             color: colors.primary,
             border: '2px solid white',
-            borderRadius: '20px',
+            borderRadius: '1.25rem',
             fontWeight: 700,
             textTransform: 'none',
-            px: { xs: 1.5, sm: 2.5 },
-            py: { xs: 0.5, sm: 0.75 },
-            fontSize: { xs: '0.75rem', sm: '0.9rem' },
+            px: { xs: 0.5, sm: 2.5 },
+            py: { xs: 0.5, sm: 2.5 },
+            fontSize: { xs: '0.75rem', sm: '1.25rem' },
             boxShadow: '0 1px 4px rgba(0, 0, 0, 0.1)',
             cursor: 'pointer',
             '&:hover': {

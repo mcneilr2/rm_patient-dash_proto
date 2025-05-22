@@ -7,34 +7,35 @@ const Footer = () => (
     sx={{
       mt: 4,
       py: { xs: 2, sm: 3 },
-      px: { xs: 2, sm: 4 },
+      px: { xs: 2, sm: 3 },
+      width: '100%',
       textAlign: 'center',
       borderTop: `1px solid ${colors.border.light}`,
       backgroundColor: colors.background.default,
+      borderTopLeftRadius: { xs: '1rem', sm: '1.5rem' },
+      borderTopRightRadius: { xs: '1rem', sm: '1.5rem' },
     }}
   >
     <Typography
       variant="body2"
-      color="text.secondary"
       sx={{
-        fontSize: { xs: '0.75rem', sm: '0.875rem' }
+        fontSize: { xs: '0.75rem', sm: '0.875rem' },
+        color: colors.text.secondary,
       }}
     >
       © 2025 Your IP Rights
     </Typography>
-    <Button
+    {/* <Button
       variant="text"
       size="small"
       sx={{
         mt: 1,
         fontSize: { xs: '0.75rem', sm: '0.875rem' },
         color: colors.primary,
-        textTransform: 'none',
-        fontWeight: 500
       }}
     >
       Help
-    </Button>
+    </Button> */}
   </Box>
 );
 
