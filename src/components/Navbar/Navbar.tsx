@@ -22,14 +22,14 @@ const NavBar = ({ onToggleHide, isHidden }: Props) => (
       color="transparent"
       sx={{ backgroundColor: 'transparent' }}
     >
-      <Toolbar
-        sx={{
-          px: { xs: '0.5rem', sm: '0.75rem' },
-          py: { xs: '0.5rem', sm: '1.5rem' },
-          display: 'flex',
-          justifyContent: 'space-between',
-        }}
-      >
+        <Toolbar
+          sx={{
+            px: { xs: '1rem', sm: '1.5rem' }, // was too large
+            py: { xs: '0.5rem', sm: '1rem' }, // reduce vertical padding
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Box
             component="img"
@@ -64,8 +64,8 @@ const NavBar = ({ onToggleHide, isHidden }: Props) => (
             borderRadius: '1.25rem',
             fontWeight: 700,
             textTransform: 'none',
-            px: { xs: '0.5rem', sm: '2.5rem' },
-            py: { xs: '0.5rem', sm: '2.5rem' },
+            px: '0.5rem',
+            py: '0.5rem',
             fontSize: { xs: '0.75rem', sm: '1.25rem' },
             boxShadow: colors.shadow.light,
             cursor: 'pointer',

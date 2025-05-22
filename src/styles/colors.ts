@@ -1,6 +1,7 @@
 export const colors = {
   background: {
-    default: '#fefbf5',         // container beige
+    default: '#fefbf5',
+    header: '#f4eae0',       
     paper: '#ffffff',           // table row white
     rowAlternate: '#f8f8f8',    // striped row color
     tableHeader: '#f1f1ef',

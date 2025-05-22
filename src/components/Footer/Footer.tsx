@@ -12,8 +12,7 @@ const Footer = () => (
       textAlign: 'center',
       borderTop: `1px solid ${colors.border.light}`,
       backgroundColor: colors.background.default,
-      borderTopLeftRadius: { xs: '1rem', sm: '1.5rem' },
-      borderTopRightRadius: { xs: '1rem', sm: '1.5rem' },
+      borderRadius: { xs: '1rem', sm: '1.5rem' }
     }}
   >
     <Typography

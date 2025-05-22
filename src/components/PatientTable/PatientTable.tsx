@@ -198,17 +198,20 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
       )}
 
       <Box
-        sx={{
-          maxHeight: 500,
+          sx={{
+          maxHeight: '31.25rem', // 500px in rem
+          overflowX: 'auto',
           overflowY: 'auto',
           border: `2px solid ${colors.border.beige}`,
           borderRadius: '1rem',
           backgroundColor: colors.background.paper,
+          paddingRight: '0.5rem', // helps prevent scrollbars from clipping
+          boxSizing: 'border-box',
         }}
       >
         <Table stickyHeader>
-          <TableHead sx={{ backgroundColor: colors.secondary }}>
-            <TableRow>
+          <TableHead >
+            <TableRow >
               {[...nameKeys, 'dob', 'status', 'address'].map((field) => (
                 <TableCell
                   key={field}
@@ -221,17 +224,32 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
                 >
                   {field === 'status' ? (
                     <Box display="flex" alignItems="center" gap={1}>
-                      <Select
+                     <Select
                         size="small"
                         value={statusFilter}
                         displayEmpty
                         onChange={(e) => setStatusFilter(e.target.value)}
                         renderValue={(selected) => selected || 'Any Status'}
                         sx={{
-                          fontSize: '0.75rem',
-                          minWidth: '80px'
+                          fontSize: '0.875rem',
+                          minWidth: '8rem',
+                          height: '2.25rem',
+                          lineHeight: '2.25rem',
+                          px: '0.75rem',
+                          backgroundColor: colors.grey.select,
+                          color: colors.text.primary,
+                          borderRadius: '0.5rem',
+                          '& .MuiSelect-select': {
+                            padding: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                          },
+                          '& fieldset': {
+                            border: `1px solid ${colors.border.beige}`,
+                          },
                         }}
                       >
+
                         <MenuItem value="">Any Status</MenuItem>
                         {getUniqueStatusValues().map((val) => (
                           <MenuItem key={val} value={val}>
