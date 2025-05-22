@@ -4,11 +4,10 @@ export const colors = {
     paper: '#ffffff',           // table row white
     rowAlternate: '#f8f8f8',    // striped row color
     tableHeader: '#f1f1ef',
-    input: '#f4f4f4',
-    gradient: 'linear-gradient(to bottom, #fffdfa, #fefbf5)',
+    input: '#f4f4f4'
   },
   primary: '#f57c00',           // deep orange
-  secondary: '#ffd54f',         // soft yellow
+  secondary: '#f5c242',         // soft yellow
   text: {
     primary: '#2d2d2d',
     secondary: '#5f5f5f',

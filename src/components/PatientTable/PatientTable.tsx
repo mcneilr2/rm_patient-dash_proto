@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import type { Patient, Status } from '../../types/Patient';
 import { colors } from '../../styles/colors';
 import { addPatient } from '../../services/patients';
+import SearchField from '../SearchField/SearchField';
 
 const splitName = (full: string) => {
   const parts = full.trim().split(/\s+/);
@@ -32,6 +33,7 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [statusFilter, setStatusFilter] = useState('');
   const [adding, setAdding] = useState(false);
+  const [query, setQuery] = useState(searchQuery);
   const [newPatient, setNewPatient] = useState({
     name: '',
     dob: '',
@@ -48,16 +50,6 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
     }
   }, [hidden]);
 
-  if (hidden) {
-    return (
-      <Box sx={{ textAlign: 'center', py: 10 }}>
-        <Typography variant="h6" color="text.secondary">
-          🔒 Screen Hidden
-        </Typography>
-      </Box>
-    );
-  }
-
   const handleSort = (field: typeof sortBy) => {
     setSortBy(field);
     setSortDirection(prev =>
@@ -69,33 +61,23 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
     setNewPatient(prev => ({ ...prev, [field]: value }));
   };
 
-const handleUploadClick = async () => {
-  console.log("📦 Upload button clicked");
+  const handleUploadClick = async () => {
+    if (!newPatient.name || !newPatient.dob || !newPatient.status || !newPatient.address) {
+      alert("All fields are required.");
+      return;
+    }
 
-  const { name, dob, status, address } = newPatient;
+    try {
+      const created = await addPatient(newPatient);
+      await onAddPatient?.(created);
+      setNewPatient({ name: '', dob: '', status: 'Inquiry', address: '' });
+      setAdding(false);
+    } catch (err: any) {
+      alert(err?.message || 'Failed to add patient.');
+    }
+  };
 
-  if (!name || !dob || !status || !address) {
-    alert("All fields are required.");
-    return;
-  }
-
-  try {
-    console.log("📤 Sending patient to API:", newPatient);
-    const created = await addPatient({ name, dob, status, address });
-    console.log("✅ API responded with:", created);
-
-    await onAddPatient?.(created);
-    setNewPatient({ name: '', dob: '', status: 'Inquiry', address: '' });
-    setAdding(false);
-  } catch (err: any) {
-    console.error("❌ Upload failed:", err);
-    alert(err?.message || 'Failed to add patient.');
-  }
-};
-
-
-
-  const normalizedQuery = (searchQuery || '').trim().toLowerCase();
+  const normalizedQuery = query.trim().toLowerCase();
   const filtered = patients.filter(p => {
     const { first, middle, last } = splitName(p.name);
     return (!statusFilter || p.status === statusFilter) &&
@@ -115,9 +97,19 @@ const handleUploadClick = async () => {
   const getUniqueStatusValues = () =>
     [...new Set(patients.map(p => p.status))];
 
+  if (hidden) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 10 }}>
+        <Typography variant="h6" color="text.secondary">
+          🔒 Screen Hidden
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, marginBottom: '1rem' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
         <Button
           variant="outlined"
           startIcon={<Add />}
@@ -125,7 +117,7 @@ const handleUploadClick = async () => {
           sx={{
             border: `2px solid ${colors.border.beige}`,
             color: colors.primary,
-            backgroundColor: colors.background.paper,
+            backgroundColor: colors.grey.select,
             borderRadius: 2,
             px: 2,
             py: 1,
@@ -182,61 +174,90 @@ const handleUploadClick = async () => {
               onChange={(e) => handleNewPatientChange('address', e.target.value)}
               sx={{ flex: 2 }}
             />
-          <Button
-            variant="contained"
-            color="success"
-            onClick={handleUploadClick}
-            sx={{ minWidth: '40px', px: 1 }}
-          >
-            <Upload />
-          </Button>
+            <Button
+              variant="contained"
+              color="success"
+              onClick={handleUploadClick}
+              sx={{ minWidth: '40px', px: 1 }}
+            >
+              <Upload />
+            </Button>
           </Stack>
         </Box>
       )}
+
+      <SearchField value={query} onChange={setQuery} />
 
       <Box
         sx={{
           maxHeight: 500,
           overflowY: 'auto',
           border: `2px solid ${colors.border.beige}`,
-          borderRadius: 2,
-          backgroundColor: colors.background.default,
+          borderRadius: '1rem',
+          backgroundColor: colors.background.paper
         }}
       >
         <Table stickyHeader>
-          <TableHead sx={{ backgroundColor: colors.grey.select }}>
+          <TableHead>
             <TableRow>
               {[...nameKeys, 'dob', 'status', 'address'].map((field) => (
-                <TableCell key={field}>
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <TableSortLabel
-                      active={sortBy === field}
-                      direction={sortBy === field ? sortDirection : 'asc'}
-                      onClick={() => handleSort(field as typeof sortBy)}
-                      sx={{
-                        '& .MuiTableSortLabel-icon': {
-                          opacity: 1,
-                          color: sortBy === field ? colors.grey[800] : colors.grey[400]
-                        }
-                      }}
-                    >
-                      {field.toUpperCase()}
-                    </TableSortLabel>
-                    {field === 'status' && (
-                      <Select
-                        size="small"
-                        value={statusFilter}
-                        displayEmpty
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        sx={{ ml: 1 }}
-                        renderValue={(selected) => selected || 'Status'}
-                      >
-                        {getUniqueStatusValues().map((val) => (
-                          <MenuItem key={val} value={val}>
-                            {val}
-                          </MenuItem>
-                        ))}
-                      </Select>
+                <TableCell
+                  key={field}
+                  sx={{
+                    backgroundColor: colors.secondary,
+                    whiteSpace: 'nowrap',
+                    minWidth: '100px'
+                  }}
+                >
+                  <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
+                    {field === 'status' ? (
+                      <>
+                        <Select
+                          size="small"
+                          value={statusFilter}
+                          displayEmpty
+                          onChange={(e) => setStatusFilter(e.target.value)}
+                          renderValue={(selected) => selected || 'Status'}
+                          sx={{
+                            backgroundColor: '#fff',
+                            flex: 1,
+                            fontSize: '0.875rem'
+                          }}
+                        >
+                          {getUniqueStatusValues().map((val) => (
+                            <MenuItem key={val} value={val}>
+                              {val}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        <TableSortLabel
+                          active={sortBy === field}
+                          direction={sortBy === field ? sortDirection : 'asc'}
+                          onClick={() => handleSort(field as typeof sortBy)}
+                          sx={{
+                            '& .MuiTableSortLabel-icon': {
+                              opacity: 1,
+                              color: sortBy === field ? colors.grey[800] : colors.grey[400]
+                            }
+                          }}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <TableSortLabel
+                          active={sortBy === field}
+                          direction={sortBy === field ? sortDirection : 'asc'}
+                          onClick={() => handleSort(field as typeof sortBy)}
+                          sx={{
+                            '& .MuiTableSortLabel-icon': {
+                              opacity: 1,
+                              color: sortBy === field ? colors.grey[800] : colors.grey[400]
+                            }
+                          }}
+                        >
+                          {field.toUpperCase()}
+                        </TableSortLabel>
+                      </>
                     )}
                   </Box>
                 </TableCell>

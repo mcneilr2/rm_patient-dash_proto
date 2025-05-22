@@ -4,6 +4,15 @@ import { createTheme } from '@mui/material/styles';
 import { colors } from './colors';
 
 const theme = createTheme({
+  breakpoints: {
+    values: {
+      xs: 330,    // Override default 0
+      sm: 786,    // Override default 600
+      md: 1280,   // Keep default
+      lg: 1440,   // Optional
+      xl: 1920,   // Optional
+    },
+  },
   palette: {
     mode: 'light',
     primary: {
@@ -43,7 +52,7 @@ const theme = createTheme({
         },
       },
     },
-  }
+  },
 });
 
 export default theme;

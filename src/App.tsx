@@ -1,13 +1,12 @@
+import { CssBaseline } from '@mui/material';
 import { useEffect, useState } from 'react';
-import {
-  CssBaseline, Box, CircularProgress, Typography
-} from '@mui/material';
-import NavBar from './components/Navbar/NavBar';
+import NavBar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
-import PatientTable from './components/PatientTable/PatientTable';
 import type { Patient } from './types/Patient';
 import { fetchPatients } from './services/patients';
+import PatientTable from './components/PatientTable/PatientTable';
 import { colors } from './styles/colors';
+import ResponsiveContainer from './components/Layout/ResponsiveContainer';
 
 function App() {
   const [hidden, setHidden] = useState(false);
@@ -30,44 +29,30 @@ function App() {
   }, []);
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        width: '100%',
-        backgroundImage: 'url("/images/blue_background_graphic.svg")',
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: '0rem 1rem'
-      }}
-    >
+    <>
       <CssBaseline />
-      <NavBar onToggleHide={() => setHidden(!hidden)} isHidden={hidden} />
-      <Box
-        sx={{
+      <div
+        style={{
+          minHeight: '100vh',
           width: '100%',
-          maxWidth: '1200px',
-          mt: 4,
-          backgroundColor: colors.background.default,
-          borderRadius: 2,
-          boxShadow: '0 0 12px rgba(0,0,0,0.1)',
-          p: 3,
+          backgroundImage: 'url("/images/blue_background_graphic.svg")',
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          padding: '0 1rem'
         }}
       >
-        {error && <Typography color="error">{error}</Typography>}
-        {loading ? (
-          <Box display="flex" justifyContent="center" mt={4}>
-            <CircularProgress />
-          </Box>
-        ) : (
+        <NavBar onToggleHide={() => setHidden(!hidden)} isHidden={hidden} />
+        <ResponsiveContainer sx={{ mt: 4, backgroundColor: colors.background.default }}>
+          {error && <div style={{ color: 'red' }}>{error}</div>}
           <PatientTable patients={patients} hidden={hidden} />
-        )}
-      </Box>
-      <Footer />
-    </Box>
+        </ResponsiveContainer>
+        <Footer />
+      </div>
+    </>
   );
 }
 

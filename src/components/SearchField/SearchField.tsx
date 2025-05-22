@@ -9,10 +9,10 @@ interface SearchFieldProps {
 const SearchField = ({
   value,
   onChange,
-  placeholder = 'Search by first name, last name, date of birth ...'
+  placeholder = 'Search by name, DOB, status, etc.',
 }: SearchFieldProps) => {
   return (
-    <Box sx={{ mb: 2, width: '100%' }}>
+    <Box sx={{ mb: { xs: 2, sm: 3 }, width: '100%' }}>
       <TextField
         fullWidth
         size="small"
@@ -21,21 +21,9 @@ const SearchField = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         sx={{
-          backgroundColor: '#fffdfa',
-          borderRadius: 1.25, // 10px
-          '& .MuiOutlinedInput-root': {
-            borderRadius: 1.25,
-            '& fieldset': {
-              borderColor: '#f1f1ef', // beige border
-              borderWidth: '2px'
-            },
-            '&:hover fieldset': {
-              borderColor: '#f1f1ef'
-            },
-            '&.Mui-focused fieldset': {
-              borderColor: '#f5c242' // soft yellow on focus
-            }
-          }
+          input: {
+            fontSize: { xs: '0.85rem', sm: '1rem' },
+          },
         }}
       />
     </Box>

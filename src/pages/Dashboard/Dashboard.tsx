@@ -1,16 +1,46 @@
-import PatientTable from '../../components/PatientTable/PatientTable';
+import { Box, CircularProgress, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
 import type { Patient } from '../../types/Patient';
+import { fetchPatients } from '../../services/patients';
+import PatientTable from '../../components/PatientTable/PatientTable';
+import ResponsiveContainer from '../../components/Layout/ResponsiveContainer';
 
-interface Props {
-  patients: Patient[];
-  hidden: boolean;
-  onAddPatient: (data: Omit<Patient, 'id'>) => void;
-}
+const Dashboard = () => {
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-const Dashboard = ({ patients, hidden, onAddPatient }: Props) => {
-  if (hidden) return null;
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await fetchPatients();
+        setPatients(data);
+      } catch (err: any) {
+        setError(err?.message || 'Error loading patients');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  return <PatientTable patients={patients} onAddPatient={onAddPatient} />;
+    load();
+  }, []);
+
+  return (
+    <ResponsiveContainer>
+      {error && (
+        <Typography color="error" variant="body1" sx={{ mb: 2 }}>
+          {error}
+        </Typography>
+      )}
+      {loading ? (
+        <Box display="flex" justifyContent="center" mt={4}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <PatientTable patients={patients} />
+      )}
+    </ResponsiveContainer>
+  );
 };
 
 export default Dashboard;
