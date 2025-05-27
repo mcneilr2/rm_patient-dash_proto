@@ -1,3 +1,5 @@
+import { yellow } from "@mui/material/colors";
+
 export const colors = {
   background: {
     default: '#fefbf5',
@@ -34,4 +36,17 @@ export const colors = {
   gradient: {
     navbar: 'linear-gradient(90deg, #f57c00 0%, #f5c242 100%)',
   },
+
+  badges: {
+  yellow: yellow[500],          // MUI yellow
+  orange: '#f57c00',            // deep orange
+  green: '#4caf50',             // MUI green 
+  red: '#f44336',               // MUI red
+  blue: '#2196f3',              // MUI blue
+  purple: '#9c27b0',            // MUI purple
+  pink: '#e91e63',              // MUI pink
+  cyan: '#00bcd4',              // MUI cyan
+  teal: '#009688',              // MUI teal
+  brown: '#795548',
+  default: '#f1f1ef'}            // MUI brown
 };

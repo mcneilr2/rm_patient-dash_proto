@@ -8,6 +8,7 @@ import type { Patient, Status } from '../../types/Patient';
 import { colors } from '../../styles/colors';
 import { addPatient } from '../../services/patients';
 import SearchField from '../SearchField/SearchField';
+import PatientBadge from '../PatientBadge/PatientBadge';
 
 const splitName = (full: string) => {
   const parts = full.trim().split(/\s+/);
@@ -232,7 +233,6 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
                         renderValue={(selected) => selected || 'Any Status'}
                         sx={{
                           fontSize: '0.875rem',
-                          minWidth: '8rem',
                           height: '2.25rem',
                           lineHeight: '2.25rem',
                           px: '0.75rem',
@@ -320,7 +320,10 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
                       {p.dob}
                     </Box>
                   </TableCell>
-                  <TableCell>{p.status}</TableCell>
+                  <TableCell>
+                    <PatientBadge status = {p.status} >
+                    </PatientBadge>
+                    </TableCell>
                   <TableCell>{p.address}</TableCell>
                 </TableRow>
               );
