@@ -5,9 +5,9 @@ import {
 import { Add, Upload, Cancel } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import type { Patient, Status } from '../../types/Patient';
-import { colors } from '../../styles/colors';
 import { addPatient } from '../../services/patients';
 import SearchField from '../SearchField/SearchField';
+import { colors } from '../../styles/colors';
 
 const splitName = (full: string) => {
   const parts = full.trim().split(/\s+/);
@@ -23,12 +23,11 @@ type NameKey = typeof nameKeys[number];
 
 interface Props {
   patients: Patient[];
-  searchQuery?: string;
-  onAddPatient?: (newPatient: Omit<Patient, 'id'>) => void;
   hidden?: boolean;
+  reloadPatients?: () => void;
 }
 
-const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Props) => {
+const PatientTable = ({ patients, hidden, reloadPatients }: Props) => {
   const [sortBy, setSortBy] = useState<'dob' | 'status' | 'address' | NameKey>('first');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [statusFilter, setStatusFilter] = useState('');
@@ -70,8 +69,8 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
     }
 
     try {
-      const created = await addPatient({ name, dob, status, address });
-      await onAddPatient?.(created);
+      await addPatient({ name, dob, status, address });
+      await reloadPatients?.();
       setNewPatient({ name: '', dob: '', status: 'Inquiry', address: '' });
       setAdding(false);
     } catch (err: any) {
@@ -181,7 +180,7 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
               variant="contained"
               color="success"
               onClick={handleUploadClick}
-              sx={{ minWidth: '40px', px: 1 }}
+              sx={{ minWidth: '2.5rem', px: 1 }}
             >
               <Upload />
             </Button>
@@ -189,7 +188,7 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
               variant="contained"
               color="error"
               onClick={() => setAdding(false)}
-              sx={{ minWidth: '40px', px: 1 }}
+              sx={{ minWidth: '2.5rem', px: 1 }}
             >
               <Cancel />
             </Button>
@@ -198,20 +197,20 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
       )}
 
       <Box
-          sx={{
-          maxHeight: '31.25rem', // 500px in rem
+        sx={{
+          maxHeight: '31.25rem',
           overflowX: 'auto',
           overflowY: 'auto',
           border: `2px solid ${colors.border.beige}`,
           borderRadius: '1rem',
           backgroundColor: colors.background.paper,
-          paddingRight: '0.5rem', // helps prevent scrollbars from clipping
+          paddingRight: '0.5rem',
           boxSizing: 'border-box',
         }}
       >
         <Table stickyHeader>
-          <TableHead >
-            <TableRow >
+          <TableHead>
+            <TableRow>
               {[...nameKeys, 'dob', 'status', 'address'].map((field) => (
                 <TableCell
                   key={field}
@@ -224,7 +223,7 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
                 >
                   {field === 'status' ? (
                     <Box display="flex" alignItems="center" gap={1}>
-                     <Select
+                      <Select
                         size="small"
                         value={statusFilter}
                         displayEmpty
@@ -249,7 +248,6 @@ const PatientTable = ({ patients, searchQuery = '', onAddPatient, hidden }: Prop
                           },
                         }}
                       >
-
                         <MenuItem value="">Any Status</MenuItem>
                         {getUniqueStatusValues().map((val) => (
                           <MenuItem key={val} value={val}>
