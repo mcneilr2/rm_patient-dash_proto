@@ -203,7 +203,14 @@ const PatientTable = ({ patients, hidden, reloadPatients }: Props) => {
         boxSizing: 'border-box',
       }}>
         <Table stickyHeader>
-          <TableHead>
+          <TableHead sx={{
+                backgroundColor: colors.background.paper,
+                zIndex: 1,
+                position: 'sticky',
+                top: 0,
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+              }}
+          >
             <TableRow>
               {['first', 'middle', 'last', 'dob', 'status', 'address'].map((field) => (
                 <TableCell key={field} sx={{ whiteSpace: 'nowrap', width: '20%' }}>
