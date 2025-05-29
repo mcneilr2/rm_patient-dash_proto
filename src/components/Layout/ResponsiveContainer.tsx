@@ -1,6 +1,11 @@
 import { Box } from '@mui/material';
 import type { BoxProps } from '@mui/material';
 
+
+// Define a responsive container component to apply consistent padding and max-width
+// Pass in the content as "children",
+// Allow additional styles via "sx" prop,
+// and spread any other props common to MUI Box
 const ResponsiveContainer = ({ children, sx = {}, ...rest }: BoxProps) => (
   <Box
     sx={{
