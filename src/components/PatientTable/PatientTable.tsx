@@ -105,25 +105,35 @@ const PatientTable = ({ patients, hidden, reloadPatients }: Props) => {
   };
 
   // Parse any search input for search values
+  // We trim whitespace and convert to lowercase for case-insensitive search
   const normalizedQuery = search.trim().toLowerCase();
   // Filter the patients based on the search query and status filter
   // We use the splitName utility to handle names correctly
   // The filter checks if the patient's name, dob, status, or address includes the search query
   // and if the status matches the selected filter
+
+//   array.filter((item, index, arr) => {
+//   return condition; });
+
   const filtered = patients.filter(p => {
     const { first, middle, last } = splitName(p.name);
+    // Keep all records if there is no status filter or if the patient's status matches the filter
+    // &&
+    // Keep all remaining records if the normalized query is empty or if the patient's name, dob, status, or address includes the search query
     return (!statusFilter || p.status === statusFilter) &&
       (!normalizedQuery || [first, middle, last, p.dob, p.status, p.address].join(' ').toLowerCase().includes(normalizedQuery));
   });
 
-  // Sort the filtered patients based on the selected sort field and direction
-  // We use the splitName utility to handle names correctly
-  // The sort function compares the values of the specified field in ascending or descending order
+  // Create a shallow copy of the filtered array and sort it based on the selected field and direction
   const sorted = [...filtered].sort((a, b) => {
+    // Use the splitName utility to handle names correctly
     const aName = splitName(a.name);
     const bName = splitName(b.name);
+    
+    // Use the sortBy field to determine which property to compare
     const aVal = aName[sortBy as keyof typeof aName] ?? (a as any)[sortBy];
     const bVal = bName[sortBy as keyof typeof bName] ?? (b as any)[sortBy];
+    
     return sortDirection === 'asc'
       ? aVal.localeCompare(bVal)
       : bVal.localeCompare(aVal);
